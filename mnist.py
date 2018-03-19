@@ -1,5 +1,6 @@
 from __future__ import print_function
 import argparse
+import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,6 +8,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
+t0 = time.time ()
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
@@ -27,7 +29,7 @@ parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
-
+print ('cuda?', args.cuda)
 torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
@@ -118,3 +120,8 @@ def main():
         train(epoch)
         test()
 
+main()
+
+t1 = time.time ()
+
+print ("Le programme a mis",t1-t0, "secondes à s'exécuter.")
