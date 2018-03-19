@@ -106,8 +106,15 @@ def test():
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
+    return correct / len(test_loader.dataset)
 
+def protocol():
+    for epoch in range(1, args.epochs + 1):
+        train(epoch)
+    return test()
 
-for epoch in range(1, args.epochs + 1):
-    train(epoch)
-    test()
+def main():
+    for epoch in range(1, args.epochs + 1):
+        train(epoch)
+        test()
+
