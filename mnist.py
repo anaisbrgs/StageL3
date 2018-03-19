@@ -8,7 +8,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
-t0 = time.time ()
+t0 = time.time () # ajout de la constante de temps t0
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
@@ -27,6 +27,8 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
+parser.add_argument('--dimension', type=int, default = 50, metavar='N',
+                    help='the dimension of the second neuron network') #ajout de l'argument dimension représentant le nombre de neurone dans la deuxième couche. 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 print ('cuda?', args.cuda)
@@ -50,15 +52,14 @@ test_loader = torch.utils.data.DataLoader(
                    ])),
     batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
-
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
         self.conv2_drop = nn.Dropout2d()
-        self.fc1 = nn.Linear(320, 50)
-        self.fc2 = nn.Linear(50, 10)
+        self.fc1 = nn.Linear(320, args.dimension)# args.dimension prend la valeur default de l'argument dimension.
+        self.fc2 = nn.Linear(args.dimension, 10)
 
     def forward(self, x):
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
@@ -122,6 +123,6 @@ def main():
 
 main()
 
-t1 = time.time ()
+t1 = time.time () # ajout de la constante de temps t1
 
-print ("Le programme a mis",t1-t0, "secondes à s'exécuter.")
+print ("Le programme a mis",t1-t0, "secondes à s'exécuter.") #compare t1 et t0, connaitre le temps d'execution du programme
