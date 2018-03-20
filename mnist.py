@@ -1,6 +1,7 @@
 from __future__ import print_function
 import argparse
 import time
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -8,7 +9,6 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
-t0 = time.time () # ajout de la constante de temps t0
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
@@ -27,8 +27,10 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
-parser.add_argument('--dimension', type=int, default = 50, metavar='N',
+parser.add_argument('--dimension', type=int, default = 50, metavar='D',
                     help='the dimension of the second neuron network') #ajout de l'argument dimension représentant le nombre de neurone dans la deuxième couche. 
+parser.add_argument('--boucle', type=int, default=0, metavar='B',
+                   help='boucle pour faire différents couche de la deuxième couche de neurone')# ajout de boucle pour automatiser le nombre de neurone dans la deuxieme couche
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 print ('cuda?', args.cuda)
@@ -38,6 +40,7 @@ if args.cuda:
 
 
 kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
+
 train_loader = torch.utils.data.DataLoader(
     datasets.MNIST('../data', train=True, download=True,
                    transform=transforms.Compose([
@@ -87,10 +90,11 @@ def train(epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.data[0]))
+        if args.log_interval>0: # rajout de la commande pour pouvoir print ou non les différents epoch ou juste le résultat
+            if batch_idx % args.log_interval == 0:
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    epoch, batch_idx * len(data), len(train_loader.dataset),
+                    100. * batch_idx / len(train_loader), loss.data[0]))
 
 def test():
     model.eval()
@@ -106,7 +110,7 @@ def test():
         correct += pred.eq(target.data.view_as(pred)).long().cpu().sum()
 
     test_loss /= len(test_loader.dataset)
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    if args.log_interval>0: print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
     return correct / len(test_loader.dataset)
@@ -119,10 +123,22 @@ def protocol():
 def main():
     for epoch in range(1, args.epochs + 1):
         train(epoch)
-        test()
+        Accuracy = test()
+    print('Test set: Final Accuracy: {:.3f}%'.format(Accuracy*100)) # print que le pourcentage de réussite final
+    
+    
+if __name__ == '__main__':  
+    if args.boucle == 1: # Pour que la boucle se fasse indiquer --boucle 1
+        rho = 10**(1/3) 
+        for i in [int (k) for k in rho**np.arange(2,9)]:# i prend les valeur en entier du tuple rho correspondra au nombre de neurone
+            args.dimension = i
+            print ('La deuxième couche de neurone comporte',i,'neurones')
+            main()
+    else:
+        t0 = time.time () # ajout de la constante de temps t0
 
-main()
+        main()
 
-t1 = time.time () # ajout de la constante de temps t1
+        t1 = time.time () # ajout de la constante de temps t1
 
-print ("Le programme a mis",t1-t0, "secondes à s'exécuter.") #compare t1 et t0, connaitre le temps d'execution du programme
+        print ("Le programme a mis",t1-t0, "secondes à s'exécuter.") #compare t1 et t0, connaitre le temps d'execution du programme
