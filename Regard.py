@@ -28,7 +28,7 @@ def show(img, gamma=.5, noise_level=.4, transpose=True):
     else:
         plt.imshow(npimg)
 
-image_data = torchvision.datasets.ImageFolder('dataset',
+image_data = torchvision.datasets.ImageFolder('datasetN',
 transforms.Compose([transforms.CenterCrop(150),
 transforms.ToTensor()]))
 
@@ -72,8 +72,14 @@ if args.cuda:
 
 kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
 
-train_loader = data_loader[0:199]
-test_loader = data_loader [200:255]
+train_loader = torch.utils.data.DataLoader(image_data, batch_size=200,
+shuffle=True)
+test_loader = torch.utils.data.DataLoader(
+    datasets.MNIST('../data', train=False, transform=transforms.Compose([
+                       transforms.ToTensor(),
+                       transforms.Normalize((0.1307,), (0.3081,))
+                   ])),
+    batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
 class Net(nn.Module):
     def __init__(self):
