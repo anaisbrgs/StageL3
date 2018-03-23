@@ -50,21 +50,15 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
-                       
-train_loader = torch.utils.data.DataLoader(torchvision.datasets.ImageFolder('dataset',
-                                            transforms.Compose([
-                                            transforms.CenterCrop(150),
-                                            transforms.ToTensor(),
-                                           transforms.Normalize((0.1307,), (0.3081,))
-                                            ])), batch_size=args.batch_size, shuffle=True,num_workers=2 )
+dataset = torchvision.datasets.ImageFolder('dataset',
+                                        transforms.Compose([
+                                        transforms.CenterCrop(150),
+                                        transforms.ToTensor(),
+                                       transforms.Normalize((0.1307,), (0.3081,))
+                                        ])) 
+train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=2)
+test_loader= torch.utils.data.DataLoader(dataset, batch_size=args.test_batch_size, shuffle=True, num_workers=2)
 
-test_loader= torch.utils.data.DataLoader(torchvision.datasets.ImageFolder                                                                 
-                                             ('dataset',
-                                            transforms.Compose([
-                                            transforms.CenterCrop(150),
-                                            transforms.ToTensor(),
-                                           transforms.Normalize((0.1307,), (0.3081,))
-                                            ])), batch_size=args.test_batch_size, shuffle=True,num_workers=2)
 classes = 'blink','left','right','center'
 
 class Net(nn.Module):
