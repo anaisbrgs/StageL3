@@ -49,13 +49,18 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
+
+IMAGENET_MEAN = [0.485, 0.456, 0.406]
+IMAGENET_STD = [0.229, 0.224, 0.225]
+
+
 kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
 dataset = torchvision.datasets.ImageFolder('dataset',
                                         transforms.Compose([
                                         transforms.CenterCrop(150),
                                         transforms.ToTensor(),
-                                       transforms.Normalize((0.1307,), (0.3081,))
-                                        ])) 
+                                        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+                                        ]))
 train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=2)
 test_loader= torch.utils.data.DataLoader(dataset, batch_size=args.test_batch_size, shuffle=True, num_workers=2)
 
@@ -84,22 +89,29 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)#x
 
 model = Net()
-if args.cuda:
-    model.cuda()
 
-criterion = nn.CrossEntropyLoss()#
+
+#optimizer = optim.Adam(model.parameters(), lr=opt.lr)
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+# define loss function (criterion) and optimizer
+criterion = F.nll_loss()
+# criterion = nn.CrossEntropyLoss()
+# criterion = nn.MSELoss()
+
+if args.cuda:
+    model = model.cuda()
+    criterion = criterion.cuda()
 
 def train(epoch):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader,0):
         if args.cuda:
             data, target = data.cuda(), target.cuda()
-        data, target = Variable(data), Variable(target)
+        # data, target = Variable(data).float(), Variable(target).float()
+        data, target = Variable(data).long(), Variable(target).long()
         optimizer.zero_grad()
         output = model(data)
-        #loss = F.nll_loss(output, target)
-        loss = criterion(output, labels)#
+        loss = criterion(output, target)
         loss.backward()
         optimizer.step()
         if args.log_interval>0: # rajout de la commande pour pouvoir print ou non les différents epoch ou juste le résultat
@@ -107,9 +119,6 @@ def train(epoch):
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(train_loader.dataset),
                     100. * batch_idx / len(train_loader), loss.data[0]))
-
-dataiter = iter(train_loader)
-images, labels = dataiter.next()
 
 def test():
     model.eval()
