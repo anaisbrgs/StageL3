@@ -28,7 +28,7 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
 parser.add_argument('--dimension', type=int, default = 50, metavar='D',
-                    help='the dimension of the second neuron network') #ajout de l'argument dimension représentant le nombre de neurone dans la deuxième couche. 
+                    help='the dimension of the second neuron network') #ajout de l'argument dimension représentant le nombre de neurone dans la deuxième couche.
 parser.add_argument('--boucle', type=int, default=0, metavar='B',
                    help='boucle pour faire différents couche de la deuxième couche de neurone')# ajout de boucle pour automatiser le nombre de neurone dans la deuxieme couche
 args = parser.parse_args()
@@ -125,11 +125,11 @@ def main():
         train(epoch)
         Accuracy = test()
     print('Test set: Final Accuracy: {:.3f}%'.format(Accuracy*100)) # print que le pourcentage de réussite final
-    
-    
-if __name__ == '__main__':  
+
+
+if __name__ == '__main__':
     if args.boucle == 1: # Pour que la boucle se fasse indiquer --boucle 1
-        rho = 10**(1/3) 
+        rho = 10**(1/3)
         for i in [int (k) for k in rho**np.arange(2,9)]:# i prend les valeur en entier du tuple rho correspondra au nombre de neurone
             args.dimension = i
             print ('La deuxième couche de neurone comporte',i,'neurones')
