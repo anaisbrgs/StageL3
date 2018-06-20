@@ -1,6 +1,7 @@
 # StageL3
 
-
+This first version has been discontinued. check out a new version at
+https://github.com/laurentperrinet/CatchTheEye
 
 
 ## LICENCE
